@@ -1,0 +1,3 @@
+/home/aaharon/systemsproject/draft2/cmake-build-debug/CMakeFiles/rebuild_cache.dir
+/home/aaharon/systemsproject/draft2/cmake-build-debug/CMakeFiles/edit_cache.dir
+/home/aaharon/systemsproject/draft2/cmake-build-debug/CMakeFiles/draft2.dir
