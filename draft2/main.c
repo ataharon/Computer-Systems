@@ -112,7 +112,7 @@ int main(int argc, char *argv[]) {
 
             //check if it is a valid input based on the definition file
             if (!validInput(nextInput, inputList, length)){
-                printf("Error: invalid input");
+                printf("Error: %c is invalid input",nextInput);
                 return 0;
             }
 
