@@ -5,6 +5,7 @@ int storeData(int length, char* file,
                int* curStateList, char* inputList, int* nextStateList);
 int getState(int length, char* file,
               int* curStateList, char* inputList, int* nextStateList);
+int validInput(char input, char* inputList, int length);
 
 int main(int argc, char *argv[]) {
     char *file1 = argv[1];
@@ -13,7 +14,7 @@ int main(int argc, char *argv[]) {
     //read through def file and get length
     int length = getLength(file1);
     //if there was an error reading the file, terminate program
-    if (length==0){return 0;}
+    if (!length){return 0;}
 
     //initialize storage arrays to the size of length
     int curStateList[length];
@@ -23,7 +24,7 @@ int main(int argc, char *argv[]) {
     //read through def again and store the def data in arrays
     int data = storeData(length, file1, curStateList, inputList, nextStateList);
     //if failed, terminate program
-    if (data==0){return 0;}
+    if (!data){return 0;}
 
     //read through input file and print final state
     getState(length, file2, curStateList, inputList, nextStateList);
@@ -107,7 +108,13 @@ int main(int argc, char *argv[]) {
         char nextInput;
 
         //read one line (single char) of the input file
-        while (fscanf(input, "%c", &nextInput) > 0) {
+        while (fscanf(input, "%c\n", &nextInput) > 0) {
+
+            //check if it is a valid input based on the definition file
+            if (!validInput(nextInput, inputList, length)){
+                printf("Error: invalid input");
+                return 0;
+            }
 
             //loop through the 3 arrays
             //when you find the index corresponding to
@@ -124,6 +131,12 @@ int main(int argc, char *argv[]) {
                     step++; //increment number of steps
                     break; //once you found a match, stop looping and read the next input
                 }
+                //if you got to the end of the loop and haven't found a match,
+                //you've reached a dead end
+                if (j==length-1){
+                    printf("Error detecting state-input match");
+                    return 0;
+                }
             }
 
         }
@@ -134,5 +147,15 @@ int main(int argc, char *argv[]) {
         return 1;
     }
 
+    int validInput(char input, char* inputList, int length){
+        //if the input isn't in the list of possible inputs,
+        //it is invalid
+        for (int k = 0; k < length; k++){
+            if (inputList[k]==input){
+                return 1; //valid: input is in the list
+            }
+        }
+        return 0; //invalid: input was not in the list
+}
 
 
