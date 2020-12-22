@@ -1,9 +1,10 @@
 #include <stdio.h>
+#include <stdlib.h>
 
 int getLength(char* file);
-int storeData(int length, char* file,
+void storeData(int length, char* file,
                int* curStateList, char* inputList, int* nextStateList);
-int getState(int length, char* file,
+void getState(int length, char* file,
               int* curStateList, char* inputList, int* nextStateList);
 int validInput(char input, char* inputList, int length);
 
@@ -13,8 +14,6 @@ int main(int argc, char *argv[]) {
 
     //read through def file and get length
     int length = getLength(file1);
-    //if there was an error reading the file, terminate program
-    if (!length){return 0;}
 
     //initialize storage arrays to the size of length
     int curStateList[length];
@@ -22,9 +21,7 @@ int main(int argc, char *argv[]) {
     int nextStateList[length];
 
     //read through def again and store the def data in arrays
-    int data = storeData(length, file1, curStateList, inputList, nextStateList);
-    //if failed, terminate program
-    if (!data){return 0;}
+    storeData(length, file1, curStateList, inputList, nextStateList);
 
     //read through input file and print final state
     getState(length, file2, curStateList, inputList, nextStateList);
@@ -37,10 +34,10 @@ int main(int argc, char *argv[]) {
         //open def file
         FILE *def = fopen(file, "r");
 
-        //check for error
+        //check for error. If error, terminate program
         if (!def) {
-            printf("Error reading definition file");
-            return 0;
+            printf("Error reading definition file\n");
+            exit(0);
         }
         printf("processing FSM definition file %s\n", file);
 
@@ -50,7 +47,6 @@ int main(int argc, char *argv[]) {
 
         //read the file one line at a time, and increment length each time
         while (fscanf(def, "%s", line) != EOF) {
-            //printf("%s\n",line);
             length++;
         }
         printf("FSM has %d transitions\n", length);
@@ -59,7 +55,7 @@ int main(int argc, char *argv[]) {
     }
 
     //stores the data from the FSM definition into 3 parallel arrays
-    int storeData(int length, char* file,
+    void storeData(int length, char* file,
                    int* curStateList, char* inputList, int* nextStateList) {
 
         //initialize 3 variables to accept data from each line of def file
@@ -73,31 +69,29 @@ int main(int argc, char *argv[]) {
         FILE *def = fopen(file, "r");
         //make sure all 3 variables are found before processing a line
         for (int i = 0; i < length; i++) {
-            if (fscanf(def, "%d:%c>%d", &var1, &var2, &var3) == 3) {
+            if (fscanf(def, "%d:%c>%d\n", &var1, &var2, &var3) == 3) {
                 curStateList[i] = var1;
                 inputList[i] = var2;
                 nextStateList[i] = var3;
             }
             //if not 3 variables detected, there is a syntax error
             else{
-                printf("Error in syntax of definition file");
-                return 0;
+                printf("Error in syntax of definition file\n");
+                exit(0);
             }
 
         }
-        //if the function finished successfully, return 1
-        return 1;
     }
 
 
     //reads input file and determines final state
-    int getState(int length, char* file,
+    void getState(int length, char* file,
                   int* curStateList, char* inputList, int* nextStateList){
 
         FILE *input = fopen(file, "r");
         if (!input) {
-            printf("Error reading input file");
-            return 0;
+            printf("Error reading input file\n");
+            exit(0);
         }
         printf("processing FSM inputs file %s\n", file);
 
@@ -112,8 +106,8 @@ int main(int argc, char *argv[]) {
 
             //check if it is a valid input based on the definition file
             if (!validInput(nextInput, inputList, length)){
-                printf("Error: %c is invalid input",nextInput);
-                return 0;
+                printf("Error: %c is invalid input\n",nextInput);
+                exit(0);
             }
 
             //loop through the 3 arrays
@@ -134,17 +128,18 @@ int main(int argc, char *argv[]) {
                 //if you got to the end of the loop and haven't found a match,
                 //you've reached a dead end
                 if (j==length-1){
-                    printf("Error detecting state-input match");
-                    return 0;
+                    printf("Error detecting state-input match for state:%d input:%c\n",
+                           curState, nextInput);
+                    exit(0);
                 }
             }
 
         }
 
         //success
-        printf("after %d steps, state machine finished successfully at state %d",
+        printf("after %d steps, state machine finished successfully at state %d\n",
                step, curState);
-        return 1;
+
     }
 
     int validInput(char input, char* inputList, int length){
@@ -156,6 +151,6 @@ int main(int argc, char *argv[]) {
             }
         }
         return 0; //invalid: input was not in the list
-}
+    }
 
 
