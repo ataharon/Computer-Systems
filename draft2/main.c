@@ -113,7 +113,7 @@ int getInputLength(char* file){
         printf("Error reading input file\n");
         exit(0);
     }
-    printf("processing FSM input file %s\n", file);
+    printf("processing FSM inputs file %s\n", file);
 
     int length = 0;
     char line;
@@ -188,6 +188,12 @@ void debugger(int length, int* curStateList, char* inputList, int* nextStateList
             //if the user typed p, print current state and definition
             if (inputChar == 'p') {
                 printf("The FSM is currently in state %d\n", curState);
+                printf("FSM has %d transitions\n",length);
+                for (int i = 0; i < length; i++){
+                    printf("transition %d: state %d with input %c "
+                           "goes to state %d\n",
+                           i, curStateList[i], inputList[i], nextStateList[i]);
+                }
             }
             else if (inputChar == 'n') {
                 curState = moveOne(length, curStateList, inputList, nextStateList,
