@@ -1,3 +1,5 @@
+//add test functions
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -10,15 +12,34 @@ void storeInputData(int length2, char* file, char* inputOrder);
 void getState(int length, int* curStateList, char* inputList, int* nextStateList,
               int length2, char* inputOrder);
 int validInput(char input, char* inputList, int length);
-int moveOne(int length, int* curStateList, char* inputList, int* nextStateList,
-            char* inputOrder, int curState, int step);
 void debugger(int length, int* curStateList, char* inputList, int* nextStateList,
               int length2, char* inputOrder);
-
+int moveOne(int length, int* curStateList, char* inputList, int* nextStateList,
+            char* inputOrder, int curState, int step);
 
 int main(int argc, char *argv[]) {
+    //if no arguments, print error message
+    if (argc==1){
+        printf("Error: please input 2 filenames\n");
+        exit(0);
+    }
+
     //if the first argument is -d, activate debugger
     int debug = (!strcmp(argv[1],"-d"));
+
+    //if too few arguments were provided, print an error message
+    //for debugger, must have 3 args, and otherwise must have 2
+    if ((debug && argc<4)||(!debug && argc<3)){
+        printf("Error: too few arguments\n");
+        exit(0);
+    }
+
+    //if too many arguments, print error message
+    //if debugger has a 4th arg or regular has a 3rd, there are too many
+    if ((debug && argc>4)||(!debug && argc>3)){
+        printf("Error: too many arguments\n");
+        exit(0);
+    }
 
     //if debugging mode, files are args 2 and 3
     //if not, files are args 1 and 2
