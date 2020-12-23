@@ -10,10 +10,11 @@ void storeInputData(int length2, char* file, char* inputOrder);
 void getState(int length, int* curStateList, char* inputList, int* nextStateList,
               int length2, char* inputOrder);
 int validInput(char input, char* inputList, int length);
+int moveOne(int length, int* curStateList, char* inputList, int* nextStateList,
+            char* inputOrder, int curState, int step);
 void debugger(int length, int* curStateList, char* inputList, int* nextStateList,
               int length2, char* inputOrder);
-int moveOne(int length, int* curStateList, char* inputList, int* nextStateList,
-            int length2, char* inputOrder, int curState, int step);
+
 
 int main(int argc, char *argv[]) {
     //if the first argument is -d, activate debugger
@@ -45,9 +46,8 @@ int main(int argc, char *argv[]) {
         debugger(length, curStateList, inputList, nextStateList, length2, inputOrder);
     }
 
-    //otherwise, read through input file and print final state
-    getState(length, curStateList, inputList, nextStateList, length2, inputOrder);
-
+    //otherwise, move through FSM and print final state
+    else {getState(length, curStateList, inputList, nextStateList, length2, inputOrder);}
 
 }
 
@@ -86,11 +86,11 @@ void storeData(int length, char* file,
     int var3;
 
     //read through def file again
-    //for each line, separate the data into the arrays
-
     FILE* def = fopen(file, "r");
-    //make sure all 3 variables are found before processing a line
+
+    //for each line, separate the data into the arrays
     for (int i = 0; i < length; i++) {
+        //make sure all 3 variables are found before processing a line
         if (fscanf(def, "%d:%c>%d\n", &var1, &var2, &var3) == 3) {
             curStateList[i] = var1;
             inputList[i] = var2;
@@ -105,7 +105,9 @@ void storeData(int length, char* file,
     }
 }
 
+//returns the length of the input file
 int getInputLength(char* file){
+    //open file
     FILE* input = fopen(file, "r");
 
     //check for error. If error, terminate program
@@ -126,10 +128,12 @@ int getInputLength(char* file){
     return length;
 }
 
+//stores data from input file into array
 void storeInputData(int length2, char* file, char* inputOrder){
-    char line;
     FILE* input = fopen(file, "r");
+    char line;
 
+    //for each line, scan the character and add it into the array
     for (int i = 0; i < length2; i++) {
         fscanf(input, "%c\n", &line);
         inputOrder[i] = line;
@@ -143,15 +147,14 @@ void getState(int length, int* curStateList, char* inputList, int* nextStateList
 
     //initialize state and step # to 0
     int curState = 0;
-    int nextState;
     int step = 0;
-    char nextInput;
 
-    //read one line (single char) of the input file
+    //until you've reached the end of the input file,
+    //move forward one state at a time
     while (step < length2){
         curState = moveOne(length, curStateList, inputList, nextStateList,
-                           length2, inputOrder, curState, step);
-        step++;
+                           inputOrder, curState, step);
+        step++; //increment step
 
     }
     //success
@@ -160,6 +163,7 @@ void getState(int length, int* curStateList, char* inputList, int* nextStateList
 
 }
 
+//checks if input char is in the list of possible inputs
 int validInput(char input, char* inputList, int length){
     //if the input isn't in the list of possible inputs,
     //it is invalid
@@ -171,6 +175,7 @@ int validInput(char input, char* inputList, int length){
     return 0; //invalid: input was not in the list
 }
 
+//activated when in debugger mode
 void debugger(int length, int* curStateList, char* inputList, int* nextStateList,
               int length2, char* inputOrder) {
 
@@ -180,10 +185,11 @@ void debugger(int length, int* curStateList, char* inputList, int* nextStateList
     char inputChar;
     char enter;
 
+    //until you've reached the end of the input file
     while (step < length2) {
-            //ask for input
+            //ask for user input
             printf("FSM debugger>");
-            scanf("%c%c", &inputChar, &enter);
+            scanf("%c%c", &inputChar, &enter); //allows for char, newline
 
             //if the user typed p, print current state and definition
             if (inputChar == 'p') {
@@ -195,26 +201,34 @@ void debugger(int length, int* curStateList, char* inputList, int* nextStateList
                            i, curStateList[i], inputList[i], nextStateList[i]);
                 }
             }
+
+            //if the user typed n, move forward one state
             else if (inputChar == 'n') {
                 curState = moveOne(length, curStateList, inputList, nextStateList,
-                length2, inputOrder, curState, step);
+                inputOrder, curState, step);
                 step++;
             }
 
+            //if the user typed anything else, print this prompt
             else{
                 printf("Error: invalid input. Enter p to print current state "
                        "or n to move one step forward.\n");
             }
 
     }
+
+    //end of inputs
     printf("after %d steps, state machine finished successfully at state %d\n",
            step, curState);
     exit(0);
 
 }
 
+//moves the FSM forward one state and returns the new state
 int moveOne(int length, int* curStateList, char* inputList, int* nextStateList,
-                  int length2, char* inputOrder, int curState, int step){
+                  char* inputOrder, int curState, int step){
+
+    //get the next input from the inputs array
     char nextInput = inputOrder[step];
 
     //check if it is a valid input based on the definition file
@@ -223,7 +237,7 @@ int moveOne(int length, int* curStateList, char* inputList, int* nextStateList,
         exit(0);
     }
 
-    //loop through the 3 arrays
+    //loop through the 3 def arrays
     //when you find the index corresponding to
     //the current state and next input,
     //change the state to the value of nextState at that index
