@@ -5,7 +5,7 @@
 //Each valid input moves the FSM one state forward.
 //If completed successfully, the simulator prints the final state.
 //The optional -d argument before the filenames activates an interactive debugger
-//that allows the user to move the FSM one state at a times
+//that allows the user to move the FSM one state at a time
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -17,7 +17,7 @@ void storeData(int length, char* file,
 int getInputLength(char* file);
 void storeInputData(int length2, char* file, char* inputOrder);
 int getState(int length, int* curStateList, char* inputList, int* nextStateList,
-              int length2, char* inputOrder, int test);
+             int length2, char* inputOrder, int test);
 int validInput(char input, char* inputList, int length);
 void debugger(int length, int* curStateList, char* inputList, int* nextStateList,
               int length2, char* inputOrder);
@@ -26,6 +26,16 @@ int moveOne(int length, int* curStateList, char* inputList, int* nextStateList,
 int test();
 
 int main(int argc, char *argv[]) {
+
+    //before executing, run tests
+    test();
+    if (test() == 1){
+        printf("SUCCESS: TESTING PASSED\n");
+    }
+    else{
+        printf("ERROR: TESTING FAILED\n");
+        exit(0);
+    }
 
     //if no arguments, print error message
     if (argc==1){
@@ -71,16 +81,6 @@ int main(int argc, char *argv[]) {
     //store input data in array
     storeInputData(length2, file2, inputOrder);
 
-    //before executing functions, run tests
-    test();
-    if (test() == 1){
-        printf("SUCCESS: TESTING PASSED\n");
-    }
-    else{
-        printf("ERROR: TESTING FAILED\n");
-        exit(0);
-    }
-
     //if debugger mode, open debugger
     if (debug){
         debugger(length, curStateList, inputList, nextStateList, length2, inputOrder);
@@ -105,7 +105,7 @@ int getLength(char *file) {
     printf("processing FSM definition file %s\n", file);
 
     int length = 0;
-    char* line;
+    char line[23]; //max length of line- assuming 10 digit ints
 
     //read the file one line at a time, and increment length each time
     while (fscanf(def, "%s", line) != EOF) {
@@ -136,7 +136,7 @@ void storeData(int length, char* file,
             inputList[i] = var2;
             nextStateList[i] = var3;
         }
-        //if not 3 variables detected, there is a syntax error
+            //if not 3 variables detected, there is a syntax error
         else{
             printf("Error in syntax of definition file\n");
             exit(0);
@@ -183,7 +183,7 @@ void storeInputData(int length2, char* file, char* inputOrder){
 
 //reads input file and determines final state
 int getState(int length, int* curStateList, char* inputList, int* nextStateList,
-               int length2, char* inputOrder, int test){
+             int length2, char* inputOrder, int test){
 
     //initialize state and step # to 0
     int curState = 0;
@@ -199,8 +199,8 @@ int getState(int length, int* curStateList, char* inputList, int* nextStateList,
     }
     //success
     if(!test){ //don't print for tests
-    printf("after %d steps, state machine finished successfully at state %d\n",
-           step, curState);}
+        printf("after %d steps, state machine finished successfully at state %d\n",
+               step, curState);}
 
     return curState;
 
@@ -230,33 +230,33 @@ void debugger(int length, int* curStateList, char* inputList, int* nextStateList
 
     //until you've reached the end of the input file
     while (step < length2) {
-            //ask for user input
-            printf("FSM debugger>");
-            scanf("%c%c", &inputChar, &enter); //allows for char, newline
+        //ask for user input
+        printf("FSM debugger>");
+        scanf("%c%c", &inputChar, &enter); //allows for char, newline
 
-            //if the user typed p, print current state and definition
-            if (inputChar == 'p') {
-                printf("The FSM is currently in state %d\n", curState);
-                printf("FSM has %d transitions\n",length);
-                for (int i = 0; i < length; i++){
-                    printf("transition %d: state %d with input %c "
-                           "goes to state %d\n",
-                           i, curStateList[i], inputList[i], nextStateList[i]);
-                }
+        //if the user typed p, print current state and definition
+        if (inputChar == 'p') {
+            printf("The FSM is currently in state %d\n", curState);
+            printf("FSM has %d transitions\n",length);
+            for (int i = 0; i < length; i++){
+                printf("transition %d: state %d with input %c "
+                       "goes to state %d\n",
+                       i, curStateList[i], inputList[i], nextStateList[i]);
             }
+        }
 
-            //if the user typed n, move forward one state
-            else if (inputChar == 'n') {
-                curState = moveOne(length, curStateList, inputList, nextStateList,
-                inputOrder, curState, step,0);
-                step++;
-            }
+        //if the user typed n, move forward one state
+        else if (inputChar == 'n') {
+            curState = moveOne(length, curStateList, inputList, nextStateList,
+                               inputOrder, curState, step,0);
+            step++;
+        }
 
-            //if the user typed anything else, print this prompt
-            else{
-                printf("Error: invalid input. Enter p to print current state "
-                       "or n to move one step forward.\n");
-            }
+        //if the user typed anything else, print this prompt
+        else{
+            printf("Error: invalid input. Enter p to print current state "
+                   "or n to move one step forward.\n");
+        }
 
     }
 
@@ -269,7 +269,7 @@ void debugger(int length, int* curStateList, char* inputList, int* nextStateList
 
 //moves the FSM forward one state and returns the new state
 int moveOne(int length, int* curStateList, char* inputList, int* nextStateList,
-                  char* inputOrder, int curState, int step, int test){
+            char* inputOrder, int curState, int step, int test){
 
     //get the next input from the inputs array
     char nextInput = inputOrder[step];
@@ -288,9 +288,9 @@ int moveOne(int length, int* curStateList, char* inputList, int* nextStateList,
         if (curStateList[j] == curState && inputList[j] == nextInput) {
             int nextState = nextStateList[j];
             if (!test) //don't print for tests
-                {printf("at step %d, "
-                   "input %c transitions FSM from state %d to state %d\n",
-                   step, nextInput, curState, nextState);}
+            {printf("at step %d, "
+                    "input %c transitions FSM from state %d to state %d\n",
+                    step, nextInput, curState, nextState);}
             curState = nextState;   //the next state becomes the new state to work with
             break; //once you found a match, stop looping and read the next input
         }
@@ -308,6 +308,7 @@ int moveOne(int length, int* curStateList, char* inputList, int* nextStateList,
 }
 
 //tests functions
+//tests for both upper and lowercase letters, ints of varying lengths
 int test(){
     //sample FSM:
     int testCurStateList[] = {0,20,4,8000};
@@ -315,12 +316,16 @@ int test(){
     int testNextStateList[] = {8000,20,6,4};
     char* testInputOrder = "ttS";
 
+    //test function to move forward one step
     int test1 = moveOne(4, testCurStateList, testInputList, testNextStateList,
-    testInputOrder, 0, 0,1);
+                        testInputOrder, 0, 0,1);
+    //test function to get final state
     int test2 = getState(4, testCurStateList, testInputList, testNextStateList,
-    3, testInputOrder,1);
+                         3, testInputOrder,1);
+    //test function to check for valid input
     int test3 = validInput('z',testInputList,4);
 
+    //if all functions produced expected results, return 1
     return (test1 == 8000 && test2 == 6 && test3 == 0);
 
 }
